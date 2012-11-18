@@ -85,16 +85,19 @@ else
       a
     end
   end
-  secrets_with_score_sorted = secrets_with_score.sort { |a,b| a[1][:score]<=>b[1][:score] }
 
-  # Copy first match to clipboard
-  copied_secret = secrets_with_score_sorted.first[1][:secret]
-  `echo #{generate_otp(timecode(Time.now),copied_secret)} | pbcopy`
+  unless secrets_with_score.empty?
+    secrets_with_score_sorted = secrets_with_score.sort { |a,b| a[1][:score]<=>b[1][:score] }
 
-  secrets_with_score_sorted.each do |k,v|
-    print "%06d %s" % [generate_otp(timecode(Time.now),v[:secret]), k]
-    (k == secrets_with_score_sorted.first.first) ? puts(" <-- copied to clipboard") : puts("")
-  end
+    # Copy first match to clipboard
+    copied_secret = secrets_with_score_sorted.first[1][:secret]
+    `echo #{generate_otp(timecode(Time.now),copied_secret)} | pbcopy`
+
+    secrets_with_score_sorted.each do |k,v|
+      print "%06d %s" % [generate_otp(timecode(Time.now),v[:secret]), k]
+      (k == secrets_with_score_sorted.first.first) ? puts(" <-- copied to clipboard") : puts("")
+    end
+ end
 
 end
 
