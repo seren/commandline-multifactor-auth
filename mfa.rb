@@ -71,7 +71,7 @@ if ARGV.empty?
     puts "%06d %s" % [generate_otp(timecode(Time.now),v), k]
   end
 
-# If arguments were submitted, output matching OPTs ordered my match closness, and copy the first match to the clipboard (on OS X)
+# If arguments, output matching OPTs ordered my match closness, and copy the first match to the clipboard (on OS X)
 else
   reg = Regexp.new("^"+ARGV[0]+"(.*)")
   # Builds a hash of secrets (where the key matched the regexp), consisting of: the key, the secret, and regexp score
@@ -91,10 +91,12 @@ else
 
     # Copy first match to clipboard
     copied_secret = secrets_with_score_sorted.first[1][:secret]
-    `echo #{generate_otp(timecode(Time.now),copied_secret)} | pbcopy`
+    otp = format_opt( generate_otp(timecode(Time.now),copied_secret) )
+    `echo #{otp} | pbcopy`
 
     secrets_with_score_sorted.each do |k,v|
-      print "%06d %s" % [generate_otp(timecode(Time.now),v[:secret]), k]
+      otp = format_opt( generate_otp(timecode(Time.now),v[:secret]) )
+      print("#{otp} #{k}")
       (k == secrets_with_score_sorted.first.first) ? puts(" <-- copied to clipboard") : puts("")
     end
  end
