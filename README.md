@@ -1,7 +1,7 @@
-commandline-mfa
+commandline-multifactor-auth
 ===============
 
-This is ruby script to output one-time passwords as an alternative to using Google Authenticator.
+This is ruby script to output one-time passwords as an alternative to using Google Authenticator for multi-factor authentication.
 
 It can be used with the TOTP (time-based one-time passwords) that many sites and tools have adopted (eg. gmail, aws, wordpress, ssh, lastpass, dreamhost, cpanel, etc).
 
