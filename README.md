@@ -12,12 +12,16 @@ It can be used with the TOTP (time-based one-time passwords) that many sites and
 
 Example:
 
+    $ ruby mfa.rb fred
+    892654 fred@cheesypoofs.com <-- copied to clipboard
+
+    $ ruby mfa.rb bob
+    807194 bob-aws <-- copied to clipboard
+    120680 bobby@gmail
+
     $ ruby mfa.rb
     355719 b@gmail
     207986 bobby@gmail
-    751457 bob@aws
-
-    $ ruby mfa.rb bob
-    807194 bob@aws <-- copied to clipboard
-    120680 bobby@gmail
+    751457 bob-aws
+    892654 fred@cheesypoofs.com
 
