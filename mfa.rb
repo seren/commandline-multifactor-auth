@@ -17,10 +17,13 @@ secrets=[
 ["bob@aws", "WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B"]
 ]
 
-
 @interval = 30
 @digits = 6
 @digest = "sha1"
+
+# Make sure secrets are uppercase
+secrets=secrets.map { |s| [s[0],s[1].upcase] }
+
 
 def timecode(time)
   time.utc.to_i / @interval
