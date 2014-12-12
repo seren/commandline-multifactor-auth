@@ -1,11 +1,13 @@
 commandline-multifactor-auth
 ===============
 
-This is ruby script to output one-time passwords as an alternative to using Google Authenticator for multi-factor authentication.
+This ruby script generates TOTPs (time-based one-time passwords) for multi-factor authentication, as an alternative to using a utility such as Google Authenticator.
 
 On OS X, if it's given an argument that matches a single entry, that entry will be copied to the clipboard. It may or may not work on other platforms.
 
-It can be used with the TOTP (time-based one-time passwords) that many sites and tools have adopted (eg. gmail, aws, wordpress, ssh, lastpass, dreamhost, cpanel, etc).
+It can be used with the TOTPs that many sites and tools have adopted (eg. gmail, aws, wordpress, ssh, lastpass, dreamhost, cpanel, etc).
+
+Security note: The secrets are stored in a plaintext YML file. It's recommended to secure this file, such as on an encrypted volume (ex: TruCrypt, encrypted DMG, etc). In the future this data should be encrypted or moved into the OS's secured storage.
 
 
 ## Usage ##
@@ -21,7 +23,7 @@ Example:
     807194 bob-aws <-- copied to clipboard
     120680 bobby@gmail
 
-    $ ruby mfa.rb
+    $ ruby mfa.rb    # no argument given, so nothing copied
     355719 0 - b@gmail
     207986 1 - bobby@gmail
     751457 2 - bob-aws
