@@ -18,12 +18,12 @@ begin
   secrets=YAML.load(File.read(base_path + "/mfa.yml"))
 rescue
   print("Couldn't find #{base_path}/mfa.yml. Using example secrets instead.\n")
-secrets=[
-["b@gmail", "CSWKEH3YUILXYCEU2V7T5GNWNM2PAW4V2ZHFOW6JLW6MEGY2OGJO7RIIQ37IEI3D"],
-["bobby@gmail", "7I4IW6KYA7JXNUQ55A33FNPHEVVVAOWJ2BWNV6ZMKYWMFRLLUPO5AFDL2RCDR77F"],
+  secrets=[
+    ["b@gmail", "CSWKEH3YUILXYCEU2V7T5GNWNM2PAW4V2ZHFOW6JLW6MEGY2OGJO7RIIQ37IEI3D"],
+    ["bobby@gmail", "7I4IW6KYA7JXNUQ55A33FNPHEVVVAOWJ2BWNV6ZMKYWMFRLLUPO5AFDL2RCDR77F"],
     ["bob@aws", "WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B"],
     ["other service", "s4e4632x6n2d7a5h"]
-]
+    ]
 end
 
 # Make sure secrets are uppercase
@@ -182,7 +182,7 @@ else
   secrets_with_score = score_matches(ARGV[0], secrets)
   # If nothing matched, the arg is either an index number or just wrong.
   unless secrets_with_score.empty?
-    print_scored_matches(secrets_with_score) 
+    print_scored_matches(secrets_with_score)
   else
     # Check to see if the arg is a possible index.
     if numeric?(ARGV[0]) && (ARGV[0].to_i <= secrets.count)
