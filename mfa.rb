@@ -73,7 +73,7 @@ def secret_valid?(name,secret)
   begin
     Base32.decode(secret)
   rescue
-    puts "#{name} has an invalide base32 secret:\n     #{secret}"
+    puts "#{name} has an invalid base32 secret:\n     #{secret}"
     raise
   end
 end
@@ -90,9 +90,10 @@ def check_for_typos(secrets)
 end
 
 
-def print_all(secrets)
+def print_all_with_urls(secrets)
   secrets.each do |s|
-    puts "%06d  %s" % [generate_otp(timecode(Time.now),s[1]), s[0]]
+    print "%06d  %s" % [generate_otp(timecode(Time.now),s[1]), s[0]]
+    puts "   otpauth://totp/#{s[0]}?secret=#{s[1]}"
   end
 end
 
@@ -175,6 +176,7 @@ check_for_typos(secrets)
 # If no arguments, output all OTPs
 if ARGV.empty?
   print_all_with_index(secrets)
+#  print_all_with_urls(secrets)
 else
   # See if arg matches any of the secrets' descriptions
   secrets_with_score = score_matches(ARGV[0], secrets)
