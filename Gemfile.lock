@@ -1,0 +1,12 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    base32 (0.3.2)
+    openssl (1.0.0.beta)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  base32
+  openssl

@@ -23,7 +23,7 @@ Example:
     807194 bob-aws <-- copied to clipboard
     120680 bobby@gmail
 
-    $ ruby mfa.rb    # no argument given, so nothing copied
+    $ ruby mfa.rb    # no argument given, so nothing copied to clipboard
     355719 0 - b@gmail
     207986 1 - bobby@gmail
     751457 2 - bob-aws
