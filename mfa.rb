@@ -55,7 +55,7 @@ end
 
 def generate_otp(input,secret)
   hmac = OpenSSL::HMAC.digest(
-    OpenSSL::Digest::Digest.new(@digest),
+    OpenSSL::Digest.new(@digest),
     byte_secret(secret),
     int_to_bytestring(input)
   )
