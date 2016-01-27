@@ -1,0 +1,7 @@
+# Ignore sensitive info
+mfa.yml
+
+#
+# Never ignore these
+#
+!.gitignore
