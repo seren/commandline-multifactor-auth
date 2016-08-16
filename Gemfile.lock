@@ -2,16 +2,21 @@ GEM
   remote: https://rubygems.org/
   specs:
     base32 (0.3.2)
-    mac-keychain (0.0.1)
+    corefoundation (0.2.0)
+      ffi
+    ffi (1.9.14)
     openssl (0.2.0)
+    ruby-keychain (0.3.2)
+      corefoundation (~> 0.2.0)
+      ffi
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   base32
-  mac-keychain
   openssl
+  ruby-keychain
 
 BUNDLED WITH
    1.12.5
