@@ -10,30 +10,14 @@ require "base32"
 require "openssl"
 require "yaml"
 
-
-
-# Secrets from gmail, aws, wordpress, ssh, lastpass, dreamhost, cpanel, etc
-base_path = File.expand_path(File.dirname(__FILE__))
-begin
-  secrets=YAML.load(File.read(base_path + "/mfa.yml"))
-rescue
-  print("Couldn't find #{base_path}/mfa.yml. Using example secrets instead.\n")
-  secrets=[
-    ["b@gmail", "CSWKEH3YUILXYCEU2V7T5GNWNM2PAW4V2ZHFOW6JLW6MEGY2OGJO7RIIQ37IEI3D"],
-    ["bobby@gmail", "7I4IW6KYA7JXNUQ55A33FNPHEVVVAOWJ2BWNV6ZMKYWMFRLLUPO5AFDL2RCDR77F"],
-    ["bob@aws", "WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B"],
-    ["other service", "s4e4632x6n2d7a5h"]
-    ]
-end
-
-# Make sure secrets are uppercase
-secrets=secrets.map { |s| [s[0],s[1].upcase] }
-
-
-
 @interval = 30
 @digits = 6
 @digest = "sha1"
+
+end
+
+
+
 
 def timecode(time)
   time.utc.to_i / @interval
@@ -165,13 +149,26 @@ end
 
 
 
+## Main ##
 
+# Read in descriptions and, potentially, secrets from yaml. If secrets are blank, we'll get them from the OS X keychain.
+base_path = File.expand_path(File.dirname(__FILE__))
+begin
+  secrets = YAML.load(File.read(base_path + "/mfa.yml"))
+rescue
+  print("Couldn't find #{base_path}/mfa.yml. Using example secrets instead.\n")
+  secrets = [
+      ["b@gmail", "CSWKEH3YUILXYCEU2V7T5GNWNM2PAW4V2ZHFOW6JLW6MEGY2OGJO7RIIQ37IEI3D"],
+      ["bobby@gmail", "7I4IW6KYA7JXNUQ55A33FNPHEVVVAOWJ2BWNV6ZMKYWMFRLLUPO5AFDL2RCDR77F"],
+      ["bob@aws", "WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B"],
+      ["other service", "s4e4632x6n2d7a5h"]
+    ]
+end
 
-
-
+# Make sure secrets are uppercase
+secrets.map! { |s| [s[0],s[1].upcase]}
 
 check_for_typos(secrets)
-
 
 # If no arguments, output all OTPs
 if ARGV.empty?
