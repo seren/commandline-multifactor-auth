@@ -8,15 +8,32 @@
 require "base32"
 require "openssl"
 require "yaml"
+require "keychain"
 
 @interval = 30
 @digits = 6
 @digest = "sha1"
 
+def get_secret_from_keychain(description)
+  keychain_entry = Keychain.generic_passwords.where(:service => 'mfa-secret-'+description).first
+  keychain_entry.nil? ? '' : keychain_entry.password
 end
 
+def save_secret_to_keychain(description, secret)
+  Keychain.generic_passwords.create(:service => 'mfa-secret-'+description, :password => secret)
+end
 
+def prompt(default, *args)
+  print(*args)
+  result = STDIN.gets.chomp.strip
+  return result.empty? ? default : result
+end
 
+def get_secret_from_user(id)
+  secret = prompt("", "What is the secret for account '"+id+"'? ")
+  save_secret_to_keychain(id, secret)
+  secret
+end
 
 def timecode(time)
   time.utc.to_i / @interval
@@ -146,6 +163,9 @@ def numeric?(object)
   true if Float(object) rescue false
 end
 
+def str_ok?(s)
+  (s.nil? || s.empty?) ? false : s
+end
 
 
 ## Main ##
@@ -162,6 +182,12 @@ rescue
       ["bob@aws", "WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B"],
       ["other service", "s4e4632x6n2d7a5h"]
     ]
+end
+# Make sure secret isn't empty. If it is, try to retrieve it from the OS X keychain, and if it's not there, prompt the user
+secrets.map! do |s|
+  id,secret = *s
+  s[1] = str_ok?(secret) || str_ok?(get_secret_from_keychain(id)) || str_ok?(get_secret_from_user(id))
+  s
 end
 
 # Make sure secrets are uppercase

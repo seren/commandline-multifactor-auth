@@ -7,7 +7,7 @@ On OS X, if it's given an argument that matches a single entry, that entry will 
 
 It can be used with the TOTPs that many sites and tools have adopted (eg. gmail, aws, wordpress, ssh, lastpass, dreamhost, cpanel, etc).
 
-Security note: The secrets are stored in a plaintext YML file. It's recommended to secure this file, such as on an encrypted volume (ex: TruCrypt, encrypted DMG, etc). In the future this data should be encrypted or moved into the OS's secured storage.
+Security note: The secrets can be stored in a plaintext YML file, however it's recommended that the secrets be left blank which will cause the application to get them from the user and store them securely in the OS X keychain. If you choose to store the secrets in the YML file, you should take steps to secure this file, such as storing it on an encrypted volume (ex: TruCrypt, encrypted DMG, etc).
 
 
 ## Usage ##

@@ -2,11 +2,16 @@ GEM
   remote: https://rubygems.org/
   specs:
     base32 (0.3.2)
-    openssl (1.0.0.beta)
+    mac-keychain (0.0.1)
+    openssl (0.2.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   base32
+  mac-keychain
   openssl
+
+BUNDLED WITH
+   1.12.5
