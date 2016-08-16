@@ -1,10 +1,9 @@
 # Author: Seren Thompson
 # Description: Generates identical one-time passwords as Google Authenticator would generate, given the same secret.
 # License: MIT
+# Updated: 2016-08-16
 
-
-# Note: QR code url: otpauth://totp/DESCRIPTION@mellmo?secret=SECRET
-
+# Note: QR code url: otpauth://totp/DESCRIPTION?secret=SECRET
 
 require "base32"
 require "openssl"
