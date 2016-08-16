@@ -84,7 +84,7 @@ def format_opt (int)
 end
 
 
-# Check for typos in our secrets firsst
+# Check for typos in our secrets first
 def check_for_typos(secrets)
   secrets.each { |s| secret_valid?(s[0], s[1]) }
 end
@@ -185,7 +185,7 @@ else
     print_scored_matches(secrets_with_score)
   else
     # Check to see if the arg is a possible index.
-    if numeric?(ARGV[0]) && (ARGV[0].to_i <= secrets.count)
+    if numeric?(ARGV[0]) && (ARGV[0].to_i < secrets.count)
       print_by_index_number(ARGV[0].to_i, secrets)
     end
   end
