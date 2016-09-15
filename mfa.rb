@@ -172,6 +172,7 @@ end
 
 # Read in descriptions and, potentially, secrets from yaml. If secrets are blank, we'll get them from the OS X keychain.
 base_path = File.expand_path(File.dirname(__FILE__))
+# Check that file exists
 begin
   secrets = YAML.load(File.read(base_path + "/mfa.yml"))
 rescue
