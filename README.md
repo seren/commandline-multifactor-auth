@@ -1,13 +1,13 @@
 commandline-multifactor-auth
 ===============
 
-This ruby script generates TOTPs (time-based one-time passwords) for multi-factor authentication, as an alternative to using a utility such as Google Authenticator.
+This ruby script generates TOTPs (time-based one-time passwords) for MFA (multi-factor authentication). It can be run directly on your computer and can copy the TOPT into the OS X clipboard, allowing users to quickly paste them into login screens. This is easier and faster than running a mobile app (such as Google Authenticator) and manually typing the password.
 
 On OS X, if it's given an argument that matches a single entry, that entry will be copied to the clipboard. It may or may not work on other platforms.
 
 It can be used with the TOTPs that many sites and tools have adopted (eg. gmail, aws, wordpress, ssh, lastpass, dreamhost, cpanel, etc).
 
-Security note: The secrets can be stored in a plaintext YML file, however it's recommended that the secrets be left blank which will cause the application to get them from the user and store them securely in the OS X keychain. If you choose to store the secrets in the YML file, you should take steps to secure this file, such as storing it on an encrypted volume (ex: TruCrypt, encrypted DMG, etc).
+Security note: The names and secrets can be stored in a plaintext YML file, however it's recommended that the secrets be left blank which will cause the application to prompt for them from the user and store them securely in the OS X keychain. If you choose to store the secrets in the YML file, you should take steps to secure this file, such as storing it on an encrypted volume (ex: TruCrypt, encrypted DMG, etc).
 
 
 ## Installation ##
@@ -27,9 +27,10 @@ Download the code and it's dependencies
     gem install bundler
     bundle install
 
-Set up your first MFA secret
+Set up your first account:
 
-    echo "- - my-first-secret" > mfa.yml
+    echo "- - my-first-account" > mfa.yml
+    echo "  -" >> mfa.yml
     ruby mfa.rb
 
 
