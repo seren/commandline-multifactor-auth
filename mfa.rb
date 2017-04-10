@@ -105,15 +105,19 @@ def print_all_with_index(secrets)
 end
 
 
-def print_by_index_number(i, secrets)
+def print_by_index_number(i, secrets, quiet)
   secret = secrets[ARGV[0].to_i]
   otp = format_opt( generate_otp(timecode(Time.now),secret[1]) )
-  `echo #{otp} | pbcopy`
-  puts ("#{otp} #{secret[0]}  <-- copied to clipboard")
+  if quiet
+    puts (otp)
+  else
+    `echo #{otp} | pbcopy`
+    puts ("#{otp} #{secret[0]}  <-- copied to clipboard")
+  end
 end
 
 
-def print_scored_matches(secrets_with_score)
+def print_scored_matches(secrets_with_score, quiet)
   # Sort the matched secrets
   secrets_with_score_sorted = secrets_with_score.sort { |a,b| a[2]<=>b[2] }
 
@@ -122,15 +126,20 @@ def print_scored_matches(secrets_with_score)
   otp = format_opt( generate_otp(timecode(Time.now),copied_secret) )
   `echo #{otp} | pbcopy`
 
-  first=true
-  secrets_with_score_sorted.each do |s|
-    otp = format_opt( generate_otp(timecode(Time.now),s[1]) )
-    print("#{otp} #{s[0]}")
-    if first
-      print(" <-- copied to clipboard\n")
-      first=false
-    else
-      puts
+  if quiet
+    secret = secrets_with_score_sorted.first
+    puts format_opt( generate_otp(timecode(Time.now),secret[1]) )
+  else
+    first=true
+    secrets_with_score_sorted.each do |s|
+      otp = format_opt( generate_otp(timecode(Time.now),s[1]) )
+      print("#{otp} #{s[0]}")
+      if first
+        print(" <-- copied to clipboard\n")
+        first=false
+      else
+        puts
+      end
     end
   end
 end
@@ -143,7 +152,7 @@ def args_match?(arg0, secrets)
 end
 
 
-def score_matches(arg0, secrets)
+def score_matches(arg0, secrets, quiet)
   reg = Regexp.new("^"+ARGV[0]+"(.*)")
   # Builds a hash of secrets (where the key matched the regexp), consisting of: the key, the secret, and regexp score
 
@@ -196,20 +205,31 @@ secrets.map! { |s| [s[0],s[1].upcase]}
 
 check_for_typos(secrets)
 
+args = ARGV
+if args.member?('-q')
+  quiet = true
+  args.delete('-q')
+else
+  quiet = false
+end
+
 # If no arguments, output all OTPs
-if ARGV.empty?
-  print_all_with_index(secrets)
+if args.empty?
+  unless quiet
+    print_all_with_index(secrets)
+  end
 #  print_all_with_urls(secrets)
 else
+  arg = args[0]
   # See if arg matches any of the secrets' descriptions
-  secrets_with_score = score_matches(ARGV[0], secrets)
+  secrets_with_score = score_matches(arg, secrets, quiet)
   # If nothing matched, the arg is either an index number or just wrong.
   unless secrets_with_score.empty?
-    print_scored_matches(secrets_with_score)
+    print_scored_matches(secrets_with_score, quiet)
   else
     # Check to see if the arg is a possible index.
-    if numeric?(ARGV[0]) && (ARGV[0].to_i < secrets.count)
-      print_by_index_number(ARGV[0].to_i, secrets)
+    if numeric?(arg) && (arg.to_i < secrets.count)
+      print_by_index_number(arg.to_i, secrets, quiet)
     end
   end
 end
