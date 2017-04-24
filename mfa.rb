@@ -21,6 +21,15 @@ example_secrets = [
   ["other service", "s4e4632x6n2d7a5h"]
 ]
 
+
+# Make sure secret isn't empty. If it is, try to retrieve it from the OS X keychain, and if it's not there, prompt the user
+def get_and_validate_secret_from_keychain(s)
+  id,secret = *s
+  s[1] = ( str_ok?(secret) || str_ok?(get_secret_from_keychain(id)) || str_ok?(get_secret_from_user(id)) ).upcase
+  secret_valid?(s[0], s[1])
+  s
+end
+
 def get_secret_from_keychain(description)
   keychain_entry = Keychain.generic_passwords.where(:service => 'mfa-secret-'+description).first
   keychain_entry.nil? ? '' : keychain_entry.password
@@ -112,8 +121,7 @@ def print_all_with_index(secrets)
 end
 
 
-def print_by_index_number(i, secrets, quiet)
-  secret = secrets[ARGV[0].to_i]
+def print_by_index_number(i, secret, quiet)
   otp = format_opt( generate_otp(timecode(Time.now),secret[1]) )
   if quiet
     puts (otp)
@@ -153,25 +161,33 @@ end
 
 
 def args_match?(arg0, secrets)
-  reg = Regexp.new("^"+ARGV[0]+"(.*)")
+  prefix_regex = Regexp.new("^"+ARGV[0]+"(.*)")
+  wildcard_regex = Regexp.new(ARGV[0])
   # Builds a hash of secrets (where the key matched the regexp), consisting of: the key, the secret, and regexp score
-  matches = secrets.select { |s| reg.match(s[1]) }
+  matches = secrets.select { |s| prefix_regex.match(s[1]) }
+  puts matches
+  if matches.empty?
+    puts "no prefixes"
+    matches = secrets.select { |s| wildcard_regex.match(s[1]) }
+  end
+  matches
 end
 
 
 def score_matches(arg0, secrets, quiet)
-  reg = Regexp.new("^"+ARGV[0]+"(.*)")
+  prefix_regex = Regexp.new("^"+ARGV[0]+"(.*)")
+  wildcard_regex = Regexp.new(ARGV[0])
   # Builds a hash of secrets (where the key matched the regexp), consisting of: the key, the secret, and regexp score
-
-  secrets_with_score = secrets.map do |s|
-    r = reg.match(s[0])
-    if r.nil?
-      nil
-    else
-      score = r[1]
-      [s[0],s[1],score]
-    end
-  end.compact
+  def match_and_score(regex, secrets)
+    secrets.map do |s|
+      r = regex.match(s[0])
+      # return nil (if nil) or the secret components plus the score (from the regex match)
+      r && [s[0], s[1], r[1]]
+    end.compact
+  end
+  secrets_with_prefix_score = match_and_score(prefix_regex, secrets)
+  secrets_with_wildcard_score = match_and_score(wildcard_regex, secrets)
+  secrets_with_prefix_score.empty? ? secrets_with_wildcard_score : secrets_with_prefix_score
 end
 
 
@@ -195,17 +211,6 @@ rescue
   print("Couldn't find #{base_path}/mfa.yml. Using example secrets instead.\n")
   secrets = example_secrets
 end
-# Make sure secret isn't empty. If it is, try to retrieve it from the OS X keychain, and if it's not there, prompt the user
-secrets.map! do |s|
-  id,secret = *s
-  s[1] = str_ok?(secret) || str_ok?(get_secret_from_keychain(id)) || str_ok?(get_secret_from_user(id))
-  s
-end
-
-# Make sure secrets are uppercase
-secrets.map! { |s| [s[0],s[1].upcase]}
-
-check_for_typos(secrets)
 
 args = ARGV
 if args.member?('-q')
@@ -215,23 +220,26 @@ else
   quiet = false
 end
 
+# alias_method :get_and_validate_secret, :get_and_validate_secret_from_ruby
+alias get_and_validate_secret get_and_validate_secret_from_keychain
+
 # If no arguments, output all OTPs
 if args.empty?
   unless quiet
-    print_all_with_index(secrets)
+    print_all_with_index(secrets.map { |s| get_and_validate_secret(s) })
   end
 #  print_all_with_urls(secrets)
 else
   arg = args[0]
-  # See if arg matches any of the secrets' descriptions
-  secrets_with_score = score_matches(arg, secrets, quiet)
-  # If nothing matched, the arg is either an index number or just wrong.
-  unless secrets_with_score.empty?
-    print_scored_matches(secrets_with_score, quiet)
+  # Check to see if the arg is a possible index number
+  if numeric?(arg) && (arg.to_i < secrets.count)
+    print_by_index_number(arg.to_i, get_and_validate_secret(secrets[arg.to_i]), quiet)
   else
-    # Check to see if the arg is a possible index.
-    if numeric?(arg) && (arg.to_i < secrets.count)
-      print_by_index_number(arg.to_i, secrets, quiet)
+    # Print any secrets whose description the arg matches
+    secrets_with_score = score_matches(arg, secrets, quiet)
+    unless secrets_with_score.empty?
+      secrets_with_score.map! { |s| get_and_validate_secret(s) }
+      print_scored_matches(secrets_with_score, quiet)
     end
   end
 end
