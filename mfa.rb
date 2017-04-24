@@ -14,6 +14,13 @@ require "keychain"
 @digits = 6
 @digest = "sha1"
 
+example_secrets = [
+  ["b@gmail", "CSWKEH3YUILXYCEU2V7T5GNWNM2PAW4V2ZHFOW6JLW6MEGY2OGJO7RIIQ37IEI3D"],
+  ["bobby@gmail", "7I4IW6KYA7JXNUQ55A33FNPHEVVVAOWJ2BWNV6ZMKYWMFRLLUPO5AFDL2RCDR77F"],
+  ["bob@aws", "WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B"],
+  ["other service", "s4e4632x6n2d7a5h"]
+]
+
 def get_secret_from_keychain(description)
   keychain_entry = Keychain.generic_passwords.where(:service => 'mfa-secret-'+description).first
   keychain_entry.nil? ? '' : keychain_entry.password
@@ -186,12 +193,7 @@ begin
   secrets = YAML.load(File.read(base_path + "/mfa.yml"))
 rescue
   print("Couldn't find #{base_path}/mfa.yml. Using example secrets instead.\n")
-  secrets = [
-      ["b@gmail", "CSWKEH3YUILXYCEU2V7T5GNWNM2PAW4V2ZHFOW6JLW6MEGY2OGJO7RIIQ37IEI3D"],
-      ["bobby@gmail", "7I4IW6KYA7JXNUQ55A33FNPHEVVVAOWJ2BWNV6ZMKYWMFRLLUPO5AFDL2RCDR77F"],
-      ["bob@aws", "WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B"],
-      ["other service", "s4e4632x6n2d7a5h"]
-    ]
+  secrets = example_secrets
 end
 # Make sure secret isn't empty. If it is, try to retrieve it from the OS X keychain, and if it's not there, prompt the user
 secrets.map! do |s|
