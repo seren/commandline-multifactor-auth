@@ -116,7 +116,7 @@ end
 
 def print_all_with_index(secrets)
   secrets.each_with_index do |s,i|
-    puts "%06d  %s - %s" % [generate_otp(timecode(Time.now),s[1]), i, s[0]]
+    puts "%s - %s" % [i, s[0]]
   end
 end
 
@@ -226,7 +226,7 @@ alias get_and_validate_secret get_and_validate_secret_from_keychain
 # If no arguments, output all OTPs
 if args.empty?
   unless quiet
-    print_all_with_index(secrets.map { |s| get_and_validate_secret(s) })
+    print_all_with_index(secrets)
   end
 #  print_all_with_urls(secrets)
 else
