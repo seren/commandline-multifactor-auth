@@ -4,8 +4,8 @@ GEM
     base32 (0.3.2)
     corefoundation (0.2.0)
       ffi
-    ffi (1.9.14)
-    openssl (0.2.0)
+    ffi (1.9.17)
+    openssl (2.0.3)
     ruby-keychain (0.3.2)
       corefoundation (~> 0.2.0)
       ffi
@@ -19,4 +19,4 @@ DEPENDENCIES
   ruby-keychain
 
 BUNDLED WITH
-   1.12.5
+   1.14.4
