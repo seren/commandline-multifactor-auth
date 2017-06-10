@@ -14,20 +14,23 @@ require "keychain"
 @digits = 6
 @digest = "sha1"
 
+# terms:
+#  sid = {:id, :secret}
+#  secret= "xxxxx"
+
 example_secrets = [
-  ["b@gmail", "CSWKEH3YUILXYCEU2V7T5GNWNM2PAW4V2ZHFOW6JLW6MEGY2OGJO7RIIQ37IEI3D"],
-  ["bobby@gmail", "7I4IW6KYA7JXNUQ55A33FNPHEVVVAOWJ2BWNV6ZMKYWMFRLLUPO5AFDL2RCDR77F"],
-  ["bob@aws", "WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B"],
-  ["other service", "s4e4632x6n2d7a5h"]
+  {id: "b@gmail", secret: "CSWKEH3YUILXYCEU2V7T5GNWNM2PAW4V2ZHFOW6JLW6MEGY2OGJO7RIIQ37IEI3D"},
+  {id: "bobby@gmail", secret: "7I4IW6KYA7JXNUQ55A33FNPHEVVVAOWJ2BWNV6ZMKYWMFRLLUPO5AFDL2RCDR77F"},
+  {id: "bob@aws", secret: "WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B"},
+  {id: "other service", secret: "s4e4632x6n2d7a5h"}
 ]
 
 
 # Make sure secret isn't empty. If it is, try to retrieve it from the OS X keychain, and if it's not there, prompt the user
-def get_and_validate_secret_from_keychain(s)
-  id,secret = *s
-  s[1] = ( str_ok?(secret) || str_ok?(get_secret_from_keychain(id)) || str_ok?(get_secret_from_user(id)) ).upcase
-  secret_valid?(s[0], s[1])
-  s
+def get_and_validate_secret_from_keychain(sid)
+  sid['secret'] = ( str_ok?(sid['secret']) || str_ok?(get_secret_from_keychain(sid['id'])) || str_ok?(get_secret_from_user(sid['id'])) ).upcase
+  secret_valid?(sid)
+  sid
 end
 
 def get_secret_from_keychain(description)
@@ -85,11 +88,11 @@ def generate_otp(input,secret)
 end
 
 
-def secret_valid?(name,secret)
+def secret_valid?(sid)
   begin
-    Base32.decode(secret)
+    Base32.decode(sid['secret'])
   rescue
-    puts "#{name} has an invalid base32 secret:\n     #{secret}"
+    puts "#{sid['id']} has an invalid base32 secret:\n     #{sid['secret']}"
     raise
   end
 end
@@ -102,53 +105,53 @@ end
 
 # Check for typos in our secrets first
 def check_for_typos(secrets)
-  secrets.each { |s| secret_valid?(s[0], s[1]) }
+  secrets.each { |sid| secret_valid?(sid) }
 end
 
 
 def print_all_with_urls(secrets)
-  secrets.each do |s|
-    print "%06d  %s" % [generate_otp(timecode(Time.now),s[1]), s[0]]
-    puts "   otpauth://totp/#{s[0]}?secret=#{s[1]}"
+  secrets.each do |sid|
+    print "%06d  %s" % [generate_otp(timecode(Time.now),sid['id']), sid['secret']]
+    puts "   otpauth://totp/#{sid['secret']}?secret=#{sid['id']}"
   end
 end
 
 
 def print_all_with_index(secrets)
-  secrets.each_with_index do |s,i|
-    puts "%s - %s" % [i, s[0]]
+  secrets.each_with_index do |sid,i|
+    puts "%s - %s" % [i, sid['id']]
   end
 end
 
 
-def print_by_index_number(i, secret, quiet)
-  otp = format_opt( generate_otp(timecode(Time.now),secret[1]) )
+def print_by_index_number(i, sid, quiet)
+  otp = format_opt( generate_otp(timecode(Time.now),sid['secret']) )
   if quiet
     puts (otp)
   else
     `echo #{otp} | pbcopy`
-    puts ("#{otp} #{secret[0]}  <-- copied to clipboard")
+    puts ("#{otp} #{sid[0]}  <-- copied to clipboard")
   end
 end
 
 
 def print_scored_matches(secrets_with_score, quiet)
   # Sort the matched secrets
-  secrets_with_score_sorted = secrets_with_score.sort { |a,b| a[2]<=>b[2] }
+  secrets_with_score_sorted = secrets_with_score.sort { |a,b| a[:score]<=>b[:score] }
 
   # Copy first match to clipboard
-  copied_secret = secrets_with_score_sorted.first[1]
+  copied_secret = secrets_with_score_sorted.first['secret']
   otp = format_opt( generate_otp(timecode(Time.now),copied_secret) )
   `echo #{otp} | pbcopy`
 
   if quiet
-    secret = secrets_with_score_sorted.first
-    puts format_opt( generate_otp(timecode(Time.now),secret[1]) )
+    sid = secrets_with_score_sorted.first
+    puts format_opt( generate_otp(timecode(Time.now),sid['secret']) )
   else
     first=true
-    secrets_with_score_sorted.each do |s|
-      otp = format_opt( generate_otp(timecode(Time.now),s[1]) )
-      print("#{otp} #{s[0]}")
+    secrets_with_score_sorted.each do |sid|
+      otp = format_opt( generate_otp(timecode(Time.now),sid['id']) )
+      print("#{otp} #{sid['secret']}")
       if first
         print(" <-- copied to clipboard\n")
         first=false
@@ -164,11 +167,11 @@ def args_match?(arg0, secrets)
   prefix_regex = Regexp.new("^"+ARGV[0]+"(.*)")
   wildcard_regex = Regexp.new(ARGV[0])
   # Builds a hash of secrets (where the key matched the regexp), consisting of: the key, the secret, and regexp score
-  matches = secrets.select { |s| prefix_regex.match(s[1]) }
+  matches = secrets.select { |s| prefix_regex.match(s['id']) }
   puts matches
   if matches.empty?
     puts "no prefixes"
-    matches = secrets.select { |s| wildcard_regex.match(s[1]) }
+    matches = secrets.select { |s| wildcard_regex.match(s['id']) }
   end
   matches
 end
@@ -179,10 +182,10 @@ def score_matches(arg0, secrets, quiet)
   wildcard_regex = Regexp.new(ARGV[0])
   # Builds a hash of secrets (where the key matched the regexp), consisting of: the key, the secret, and regexp score
   def match_and_score(regex, secrets)
-    secrets.map do |s|
-      r = regex.match(s[0])
+    secrets.map do |sid|
+      r = regex.match(sid['secret'])
       # return nil (if nil) or the secret components plus the score (from the regex match)
-      r && [s[0], s[1], r[1]]
+      r && sid.merge({score: r[1]})
     end.compact
   end
   secrets_with_prefix_score = match_and_score(prefix_regex, secrets)
