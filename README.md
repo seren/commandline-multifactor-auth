@@ -23,14 +23,14 @@ Download the code and it's dependencies
 
     git clone https://github.com/seren/commandline-multifactor-auth.git
     cd commandline-multifactor-auth
-    rbenv local 2.3.1  # this should be some recently version of ruby
+    rbenv local 2.3.1  # this should be a recent version of ruby
     gem install bundler
     bundle install
 
 Set up your first account:
 
-    echo "- - my-first-account" > mfa.yml
-    echo "  -" >> mfa.yml
+    echo "- id: my-first-account" > mfa.yml
+    echo "  secret:" >> mfa.yml
     ruby mfa.rb
 
 
@@ -41,18 +41,26 @@ Set up your first account:
 
 Example:
 
+By name:
+
     $ ruby mfa.rb fred
     892654 fred@cheesypoofs.com <-- copied to clipboard
+
+By name (multiple matches):
 
     $ ruby mfa.rb bob
     807194 bob-aws <-- copied to clipboard
     120680 bobby@gmail
+
+All MFA ids:
 
     $ ruby mfa.rb    # no argument given, so nothing copied to clipboard
     355719 0 - b@gmail
     207986 1 - bobby@gmail
     751457 2 - bob-aws
     892654 3 - fred@cheesypoofs.com
+
+By index number:
 
     $ ruby mfa.rb 2
     751457 2 - bob-aws <-- copied to clipboard

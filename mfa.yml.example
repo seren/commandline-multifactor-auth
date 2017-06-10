@@ -1,10 +1,10 @@
 # These accounts will have their secrets stored in the keychain
-- - b@gmail
-  -
-- - bobby@gmail
-  -
+- id: b@gmail
+  secret: ''
+- id: bobby@gmail
+  secret: ''
 # These accounts have their secrets stored unencrypted. Not recommended.
-- - bob@aws
-  - WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B
-- - other service
-  - s4e4632x6n2d7a5h
+- id: bob@aws
+  secret: WI27ZBHPOF4IAZRPOCZKAPDNRZHPCB6ECWSMWJQGCWRVOGVUVC3WBMJI5NFFMG2B
+- id: other service
+  secret: s4e4632x6n2d7a5h
