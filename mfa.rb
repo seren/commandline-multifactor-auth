@@ -109,14 +109,6 @@ def check_for_typos(secrets)
 end
 
 
-def print_all_with_urls(secrets)
-  secrets.each do |sid|
-    print "%06d  %s" % [generate_otp(timecode(Time.now),sid['id']), sid['secret']]
-    puts "   otpauth://totp/#{sid['secret']}?secret=#{sid['id']}"
-  end
-end
-
-
 def print_all_with_index(secrets)
   secrets.each_with_index do |sid,i|
     puts "%s - %s" % [i, sid['id']]
@@ -130,7 +122,7 @@ def print_by_index_number(i, sid, quiet)
     puts (otp)
   else
     `echo #{otp} | pbcopy`
-    puts ("#{otp} #{sid[0]}  <-- copied to clipboard")
+    puts ("#{otp} #{sid['id']}  <-- copied to clipboard")
   end
 end
 
@@ -150,8 +142,8 @@ def print_scored_matches(secrets_with_score, quiet)
   else
     first=true
     secrets_with_score_sorted.each do |sid|
-      otp = format_opt( generate_otp(timecode(Time.now),sid['id']) )
-      print("#{otp} #{sid['secret']}")
+      otp = format_opt( generate_otp(timecode(Time.now),sid['secret']) )
+      print("#{otp} #{sid['id']}")
       if first
         print(" <-- copied to clipboard\n")
         first=false
@@ -163,34 +155,12 @@ def print_scored_matches(secrets_with_score, quiet)
 end
 
 
-def args_match?(arg0, secrets)
-  prefix_regex = Regexp.new("^"+ARGV[0]+"(.*)")
-  wildcard_regex = Regexp.new(ARGV[0])
-  # Builds a hash of secrets (where the key matched the regexp), consisting of: the key, the secret, and regexp score
-  matches = secrets.select { |s| prefix_regex.match(s['id']) }
-  puts matches
-  if matches.empty?
-    puts "no prefixes"
-    matches = secrets.select { |s| wildcard_regex.match(s['id']) }
-  end
-  matches
-end
-
-
-def score_matches(arg0, secrets, quiet)
-  prefix_regex = Regexp.new("^"+ARGV[0]+"(.*)")
-  wildcard_regex = Regexp.new(ARGV[0])
-  # Builds a hash of secrets (where the key matched the regexp), consisting of: the key, the secret, and regexp score
-  def match_and_score(regex, secrets)
-    secrets.map do |sid|
-      r = regex.match(sid['secret'])
-      # return nil (if nil) or the secret components plus the score (from the regex match)
-      r && sid.merge({score: r[1]})
-    end.compact
-  end
-  secrets_with_prefix_score = match_and_score(prefix_regex, secrets)
-  secrets_with_wildcard_score = match_and_score(wildcard_regex, secrets)
-  secrets_with_prefix_score.empty? ? secrets_with_wildcard_score : secrets_with_prefix_score
+def score_matches(arg, secrets, quiet)
+  secrets.map do |sid|
+    i = sid['id'].index(arg)
+    # return nil (if nil) or the secret components plus the score (from the regex match)
+    i && sid.merge({score: i})
+  end.compact
 end
 
 
@@ -223,7 +193,6 @@ else
   quiet = false
 end
 
-# alias_method :get_and_validate_secret, :get_and_validate_secret_from_ruby
 alias get_and_validate_secret get_and_validate_secret_from_keychain
 
 # If no arguments, output all OTPs
@@ -231,7 +200,6 @@ if args.empty?
   unless quiet
     print_all_with_index(secrets)
   end
-#  print_all_with_urls(secrets)
 else
   arg = args[0]
   # Check to see if the arg is a possible index number
@@ -246,6 +214,4 @@ else
     end
   end
 end
-
-
 
